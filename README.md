@@ -128,6 +128,10 @@ A aplicação estará disponível na porta 3000.
   - cliente.service.ts
   - cliente.dto.ts
 
+## Diagramação
 
+<p align="center">
+  <img src="src\assets\to_readme\diagramação.png">
+</p>
 
   
