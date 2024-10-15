@@ -35,6 +35,7 @@ export class ProdutoService {
         let produtoIndex = this.produtos.findIndex(p => p.nome === produto.nome);
 
         if(produtoIndex >= 0) {
+            produto.id = this.produtos[produtoIndex].id
             this.produtos[produtoIndex] = produto;
             return;
         }

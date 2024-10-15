@@ -18,7 +18,6 @@ export class ClienteDto {
     data_de_cadastro: Date;
 
     @IsNumber()
-    @IsOptional()
     qtd_de_transacoes: number;
 
     @IsEmail()
@@ -27,5 +26,7 @@ export class ClienteDto {
     @IsPhoneNumber()
     @IsOptional()
     telefone: number;
+
+    @IsString()
     senha: string
 }

@@ -12,13 +12,10 @@ export class ClienteService {
     create(cliente: ClienteDto){
         // Gera um ID único para o cliente
         cliente.id = uuid();
-        // Inicializa a quantidade de transações se não estiver definida
-        if(cliente.qtd_de_transacoes === null || cliente.qtd_de_transacoes === undefined) {
-            cliente.qtd_de_transacoes = 0;
-        }
         // Criptografa a senha do cliente
         cliente.senha = bcryptHashSync(cliente.senha, 10)
         this.clientes.push(cliente)
+        console.log(cliente)
     }
 
     // Método para encontrar um cliente pelo email
@@ -35,7 +32,13 @@ export class ClienteService {
         let clienteIndex = this.clientes.findIndex(c => c.nome === cliente.nome);
 
         if(clienteIndex >= 0) {
+            cliente.data_de_cadastro = this.clientes[clienteIndex].data_de_cadastro
+            cliente.id = this.clientes[clienteIndex].id
+            // Criptografa a senha do cliente
+            cliente.senha = bcryptHashSync(cliente.senha, 10)
+
             this.clientes[clienteIndex] = cliente;
+            console.log(cliente)
             return;
         }
 
