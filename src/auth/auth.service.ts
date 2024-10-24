@@ -19,8 +19,8 @@ export class AuthService {
     }
 
     // Método para realizar o login do cliente
-    singIn(email: string, senha: string): AuthResponseDto {
-        const foundCliente = this.clienteService.findByEmail(email);
+    async singIn(email: string, senha: string): Promise<AuthResponseDto> {
+        const foundCliente = await this.clienteService.findByEmail(email);
 
         if(!foundCliente || !bcryptCompareSync(senha, foundCliente.senha)){
             throw new UnauthorizedException();

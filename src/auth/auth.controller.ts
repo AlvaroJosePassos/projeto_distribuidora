@@ -9,12 +9,12 @@ export class AuthController {
 
     @HttpCode(HttpStatus.OK)  // Define o código de status HTTP a ser retornado
     @Post('login')
-    singIn(
+    async singIn(
         // Extrai o email e a senha do corpo da requisição
         @Body('email') email: string, 
         @Body('senha') senha: string
-    ): AuthResponseDto {
+    ): Promise<AuthResponseDto> {
         // Chama o método de login do serviço de autenticação e retorna a resposta
-        return this.authService.singIn(email, senha);
+        return await this.authService.singIn(email, senha);
     }
 }

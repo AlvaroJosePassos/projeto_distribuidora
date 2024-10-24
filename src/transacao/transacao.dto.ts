@@ -40,5 +40,4 @@ export class TransacaoDto {
 export interface FindAllParameters {
     email_comprador: string;
     produto: string;
-    data_da_transacao: Date;
 }

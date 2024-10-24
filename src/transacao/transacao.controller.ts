@@ -11,26 +11,26 @@ export class TransacaoController {
     constructor(private readonly transacaoService: TransacaoService) { }
 
     // Busca todas as transações com base nos parâmetros fornecidos na query string
-    @Get()
-    findAll(@Query() params: FindAllParameters): TransacaoDto[] {
-        return this.transacaoService.findAll(params);
+    @Get() 
+    async findAll(@Query() params: FindAllParameters): Promise<TransacaoDto[]> {
+        return await this.transacaoService.findAll(params);
     }
 
     // Cria uma nova transação com os dados fornecidos no corpo da requisição
     @Post()
-    create(@Body() transacao: TransacaoDto) {
-        this.transacaoService.create(transacao);    
+    async create(@Body() transacao: TransacaoDto) {
+        await this.transacaoService.create(transacao);    
     }
 
-    // Marca uma transação como entregue com os dados fornecidos no corpo da requisição
-    @Put()
-    entregue(@Body() transacao: TransacaoDto) {
-        this.transacaoService.entregue(transacao);
+    // Marca uma transação como entregu com o ID fornecido no parâmetro da rota
+    @Put('/:id')
+    async entregue(@Param('id') id: string) {
+        await this.transacaoService.entregue(id);
     }
 
     // Remove uma transação com o ID fornecido no parâmetro da rota
     @Delete('/:id')
-    remove(@Param('id') id: string){
+    async remove(@Param('id') id: string){
         return this.transacaoService.remove(id);
     }
 }

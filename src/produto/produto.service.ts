@@ -1,57 +1,112 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { ConflictException, Injectable } from '@nestjs/common';
 import { ProdutoDto } from './produto.dto';
-import {v4 as uuid} from 'uuid';
+import { v4 as uuid } from 'uuid';
+import { InjectRepository } from '@nestjs/typeorm';
+import { ProdutoEntity } from 'src/db/entities/produto.entity';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class ProdutoService {
 
-    private produtos: ProdutoDto[] = [];
+    constructor(
+        @InjectRepository(ProdutoEntity)
+        private readonly produtosRepository: Repository<ProdutoEntity>
+    ) { }
 
     // Método para criar um novo produto
-    create(produto: ProdutoDto) {
-        // Gera um ID único para o produto
-        produto.id = uuid();
-        // Verifica se o produto é perecível com base na data de validade
-        if (produto.data_de_validade === undefined || produto.data_de_validade === null) {
-            produto.perecivel = false;
-        } else {
-            produto.perecivel = true;
+    async create(produto: ProdutoDto) {
+        const produtoAlreadyRegistered = await this.findByNome(produto.nome);
+
+        // Verifica se o produto já está cadastrado
+        if (produtoAlreadyRegistered) {
+            throw new ConflictException(`Produto '${produto.nome}' já cadastrado`);
         }
-        this.produtos.push(produto);
-        console.log(produto)
+
+        const dbProduto = new ProdutoEntity();
+
+        // Define as propriedades do produto a partir do DTO
+        dbProduto.nome = produto.nome;
+        dbProduto.armazem = produto.armazem;
+        dbProduto.quantidade = produto.quantidade;
+
+        // Define se o produto é perecível ou não
+        if (produto.data_de_validade === null || produto.data_de_validade === undefined) {
+            dbProduto.perecivel = false;
+        } else {
+            dbProduto.perecivel = true;
+            dbProduto.data_de_validade = produto.data_de_validade;
+        }
+        
+        dbProduto.preco_aquisicao_unitario = produto.preco_aquisicao_unitario;
+        
+        // Gera um ID único para o produto
+        dbProduto.id = uuid();
+
+        // Salva o produto no banco de dados
+        const createdProduto = await this.produtosRepository.save(dbProduto);
+
+        return this.mapEntityToDto(createdProduto);
     }
 
     // Método para encontrar um produto pelo nome
-    findByNome(nome: string): ProdutoDto {
-        const foundProduto = this.produtos.filter(p => p.nome === nome);
+    async findByNome(nome: string): Promise<ProdutoDto> {
+        const produtoFound = await this.produtosRepository.findOne({
+            where: { nome }
+        });
 
-        if (foundProduto.length){
-            return foundProduto[0]
+        // Retorna null se o produto não for encontrado
+        if (!produtoFound) {
+            return null;
         }
+
+        return this.mapEntityToDto(produtoFound);
     }
 
     // Método para atualizar um produto
-    update(produto: ProdutoDto) {
-        let produtoIndex = this.produtos.findIndex(p => p.nome === produto.nome);
+    async update(produto: ProdutoDto) {
+        const foundProduto = await this.findByNome(produto.nome);
 
-        if(produtoIndex >= 0) {
-            produto.id = this.produtos[produtoIndex].id
-            this.produtos[produtoIndex] = produto;
-            return;
+        // Verifica se o produto existe antes de atualizar
+        if (!foundProduto) {
+            throw new ConflictException(`Produto '${produto.nome}' não cadastrado`);
         }
 
-        throw new HttpException(`Produto com o nome ${produto.nome} não foi encontrado`, HttpStatus.BAD_REQUEST)
+        await this.produtosRepository.update(produto.id, this.mapDtoToEntity(produto));
     }
 
     // Método para remover um produto pelo ID
-    remove(id: string){
-        let produtoIndex = this.produtos.findIndex(p => p.id === id);
+    async remove(id: string) {
+        const result = await this.produtosRepository.delete(id);
 
-        if(produtoIndex >= 0){
-            this.produtos.splice(produtoIndex, 1);
-            return;
+        // Lança uma exceção se nenhum produto foi afetado pela remoção
+        if (!result.affected) {
+            throw new ConflictException(`Produto '${id}' não cadastrado`);
         }
+    }
 
-        throw new HttpException(`Produto com o id ${id} não foi encontrado`, HttpStatus.BAD_REQUEST)
+    // Mapeia uma entidade Produto para DTO
+    private mapEntityToDto(produtoEntity: ProdutoEntity) {
+        return {
+            id: produtoEntity.id,
+            nome: produtoEntity.nome,
+            armazem: produtoEntity.armazem,
+            data_de_validade: produtoEntity.data_de_validade,
+            perecivel: produtoEntity.perecivel,
+            preco_aquisicao_unitario: produtoEntity.preco_aquisicao_unitario,
+            quantidade: produtoEntity.quantidade,
+        };
+    }
+
+    // Mapeia um DTO Produto para entidade
+    private mapDtoToEntity(produtoDto: ProdutoDto) {
+        return {
+            id: produtoDto.id,
+            nome: produtoDto.nome,
+            armazem: produtoDto.armazem,
+            data_de_validade: produtoDto.data_de_validade,
+            perecivel: produtoDto.perecivel,
+            preco_aquisicao_unitario: produtoDto.preco_aquisicao_unitario,
+            quantidade: produtoDto.quantidade,
+        };
     }
 }

@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Param, Post, Put } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put } from '@nestjs/common';
 import { ProdutoService } from './produto.service';
 import { ProdutoDto } from './produto.dto';
 
@@ -9,19 +9,25 @@ export class ProdutoController {
 
     // Cria um novo produto com os dados fornecidos no corpo da requisição
     @Post()
-    create(@Body() produto: ProdutoDto) {
-        this.produtoService.create(produto);    
+    async create(@Body() produto: ProdutoDto) {
+        await this.produtoService.create(produto);    
+    }
+
+    // Recupera um produto pelo nome fornecido na URL
+    @Get('/:nome')
+    async findByNome(@Param('nome') nome: string): Promise<ProdutoDto> {
+        return this.produtoService.findByNome(nome)
     }
 
     // Atualiza um produto com os dados fornecidos no corpo da requisição
     @Put()
-    update(@Body() cliente:ProdutoDto) {
+    async update(@Body() cliente:ProdutoDto) {
         this.produtoService.update(cliente);
     }
 
     // Remove um produto com o ID fornecido no parâmetro da rota
     @Delete('/:id')
-    remove(@Param('id') id: string){
+    async remove(@Param('id') id: string){
         return this.produtoService.remove(id);
     }
 }

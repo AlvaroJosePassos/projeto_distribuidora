@@ -6,11 +6,12 @@ import { TransacaoModule } from './transacao/transacao.module';
 import { ProdutoModule } from './produto/produto.module';
 import { AuthModule } from './auth/auth.module';
 import { ConfigModule } from '@nestjs/config';
+import { DbModule } from './db/db.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }), 
-    ClienteModule, TransacaoModule, ProdutoModule, AuthModule],
+    ClienteModule, TransacaoModule, ProdutoModule, AuthModule, DbModule],
   controllers: [AppController],
   providers: [AppService],
 })
