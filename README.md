@@ -30,6 +30,7 @@ Este projeto é uma API web desenvolvida usando o framework [NestJS](https://nes
 - **bcrypt**
 - **uuid**
 - **class-validator** e **class-transformer**
+- **sqlite**
 
 ## Instalação
 
@@ -48,7 +49,11 @@ Siga os passos abaixo para configurar o ambiente de desenvolvimento:
     Crie um arquivo .env na raiz do projeto e adicione as seguintes variáveis:
      - JWT_SECRET=your_jwt_secret
      - JWT_EXPIRATION_TIME=3600
-
+       
+3. **Configure o Banco de dados:**
+   ```bash
+   npm run migration:run
+   
 4. **Inicie a aplicação:**
    ```bash
    npm run start
